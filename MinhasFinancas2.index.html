@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Finanças">
+<meta name="theme-color" content="#1D9E75">
+<title>Minhas Finanças</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+body{background:#f0f0ee;color:#1a1a18;min-height:100vh;padding-bottom:90px}
+
+/* NAV BOTTOM */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;display:flex;z-index:999;padding-bottom:env(safe-area-inset-bottom)}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 8px;border:none;background:none;cursor:pointer;color:#999;font-size:10px;gap:3px}
+.bnav-btn.on{color:#1D9E75;font-weight:600}
+.bnav-btn svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* SCREENS */
+.scr{display:none}.scr.on{display:block}
+
+/* HEADER */
+.hdr{background:#1D9E75;color:#fff;padding:50px 18px 20px}
+.hdr-sm{font-size:12px;opacity:.75;margin-bottom:4px}
+.hdr-big{font-size:30px;font-weight:700;letter-spacing:-0.5px}
+.hdr-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+.hdr-box{background:rgba(255,255,255,.18);border-radius:12px;padding:10px;text-align:center}
+.hdr-box-lbl{font-size:10px;opacity:.8}
+.hdr-box-val{font-size:15px;font-weight:700;margin-top:2px}
+
+/* CONTENT */
+.wrap{padding:16px}
+.sec-title{font-size:12px;font-weight:700;color:#888;letter-spacing:.5px;text-transform:uppercase;margin:16px 0 8px}
+
+/* CARDS */
+.card{background:#fff;border-radius:16px;border:1px solid #e5e5e3;margin-bottom:10px;overflow:hidden}
+.card-pad{padding:16px}
+
+/* FORM */
+.flabel{font-size:12px;color:#888;font-weight:600;margin-bottom:5px}
+.finput{width:100%;padding:13px 14px;border:1.5px solid #e0e0de;border-radius:12px;font-size:16px;color:#1a1a18;background:#fff;outline:none;-webkit-appearance:none;appearance:none}
+.finput:focus{border-color:#1D9E75}
+.fgroup{margin-bottom:12px}
+.fbtn{width:100%;padding:15px;border-radius:14px;border:none;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:.2px}
+.fbtn-green{background:#1D9E75;color:#fff}
+.fbtn-outline{background:#fff;color:#1D9E75;border:2px solid #1D9E75}
+.fbtn:active{opacity:.8}
+
+/* ALERTS */
+.alrt{border-radius:12px;padding:12px 14px;margin-bottom:10px;font-size:13px;line-height:1.5;border:1px solid transparent;display:flex;gap:10px;align-items:flex-start}
+.alrt-warn{background:#FAEEDA;border-color:#EF9F27;color:#633806}
+.alrt-red{background:#FCEBEB;border-color:#E24B4A;color:#791F1F}
+.alrt svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0;margin-top:1px}
+
+/* CATEGORY */
+.catcard{background:#fff;border-radius:14px;border:1px solid #e5e5e3;padding:14px;margin-bottom:10px}
+.cat-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.cat-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.cat-info{margin-left:10px;flex:1}
+.cat-nm{font-size:14px;font-weight:700}
+.cat-lm{font-size:11px;color:#888;margin-top:2px}
+.cat-val{font-size:16px;font-weight:700;text-align:right}
+.bar{height:7px;background:#eee;border-radius:99px;overflow:hidden;margin-bottom:6px}
+.bar-in{height:100%;border-radius:99px;transition:width .4s}
+.cat-bot{display:flex;justify-content:space-between;align-items:center}
+.badge{font-size:11px;padding:3px 10px;border-radius:99px;font-weight:700}
+.b-ok{background:#EAF3DE;color:#27500A}
+.b-warn{background:#FAEEDA;color:#633806}
+.b-over{background:#FCEBEB;color:#791F1F}
+
+/* HISTORY */
+.hist-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0ee}
+.hist-row:last-child{border-bottom:none}
+.hist-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.hist-info{margin-left:10px;flex:1}
+.hist-nm{font-size:14px;font-weight:600}
+.hist-dt{font-size:11px;color:#888;margin-top:2px}
+.hist-v{font-size:15px;font-weight:700;color:#A32D2D}
+.delbtn{background:none;border:none;padding:8px;cursor:pointer;color:#bbb}
+.delbtn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* INVEST */
+.inv-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.inv-box{background:#fff;border-radius:14px;border:1px solid #e5e5e3;padding:14px}
+.inv-box-lbl{font-size:11px;color:#888;margin-bottom:4px}
+.inv-box-val{font-size:18px;font-weight:700}
+.inv-box-val.grn{color:#1D9E75}
+.inv-box-val.blu{color:#185FA5}
+.inv-card{background:#fff;border-radius:14px;border:1px solid #e5e5e3;padding:14px;margin-bottom:10px}
+.inv-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.inv-nm{font-size:14px;font-weight:700}
+.inv-tp{font-size:11px;padding:3px 9px;border-radius:99px;font-weight:600}
+.inv-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+.inv-lbl{color:#888}
+.inv-vl{font-weight:600}
+.inv-vl.g{color:#1D9E75}
+
+/* TIPS */
+.tip{border-radius:14px;padding:14px;margin-bottom:10px;border:1.5px solid transparent}
+.tip h4{font-size:14px;font-weight:700;margin-bottom:5px}
+.tip p{font-size:13px;line-height:1.6}
+.tip-g{background:#E1F5EE;border-color:#5DCAA5;color:#085041}
+.tip-b{background:#E6F1FB;border-color:#85B7EB;color:#0C447C}
+.tip-y{background:#FAEEDA;border-color:#EF9F27;color:#633806}
+.tip-r{background:#FCEBEB;border-color:#F09595;color:#791F1F}
+
+/* BACK BTN */
+.backbtn{display:flex;align-items:center;gap:6px;background:none;border:none;color:#1D9E75;font-size:15px;font-weight:700;cursor:pointer;padding:16px 0 8px}
+.backbtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.5}
+
+/* CFG rows */
+.cfg-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #f0f0ee}
+.cfg-row:last-child{border-bottom:none}
+.cfg-left{display:flex;align-items:center;gap:10px}
+.cfg-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.cfg-nm{font-size:14px;font-weight:600}
+.cfg-lm{font-size:12px;color:#888;margin-top:1px}
+
+.empty{text-align:center;padding:32px 16px;color:#aaa;font-size:14px;line-height:1.6}
+
+/* FAB */
+.fab{position:fixed;right:20px;bottom:90px;width:56px;height:56px;border-radius:28px;background:#1D9E75;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(29,158,117,.4);z-index:99}
+.fab svg{width:28px;height:28px;stroke:#fff;fill:none;stroke-width:2.5}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:flex-end}
+.modal-bg.hide{display:none}
+.modal{background:#fff;border-radius:24px 24px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom));width:100%;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:16px}
+.modal-close{float:right;background:none;border:none;font-size:24px;cursor:pointer;color:#888;margin-top:-4px}
+</style>
+</head>
+<body>
+
+<!-- ===== HOME ===== -->
+<div id="scr-home" class="scr on">
+  <div class="hdr">
+    <div class="hdr-sm">Salário mensal</div>
+    <div class="hdr-big" id="h-sal">€ 0,00</div>
+    <div class="hdr-grid">
+      <div class="hdr-box"><div class="hdr-box-lbl">Disponível</div><div class="hdr-box-val" id="h-disp">€ 0,00</div></div>
+      <div class="hdr-box"><div class="hdr-box-lbl">Gasto</div><div class="hdr-box-val" id="h-gasto">€ 0,00</div></div>
+      <div class="hdr-box"><div class="hdr-box-lbl">Investido</div><div class="hdr-box-val" id="h-inv">€ 0,00</div></div>
+    </div>
+  </div>
+  <div class="wrap">
+    <div id="alerts"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="sec-title" style="margin-top:0">Categorias</div>
+    </div>
+    <div id="cat-list"></div>
+  </div>
+  <button class="fab" onclick="openModal('modal-gasto')" aria-label="Adicionar gasto">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+</div>
+
+<!-- ===== HISTÓRIO ===== -->
+<div id="scr-hist" class="scr">
+  <div class="hdr" style="padding-bottom:16px">
+    <div class="hdr-sm">Este mês</div>
+    <div class="hdr-big">Histórico</div>
+  </div>
+  <div class="wrap">
+    <div id="hist-list"></div>
+  </div>
+</div>
+
+<!-- ===== INVESTIMENTOS ===== -->
+<div id="scr-inv" class="scr">
+  <div class="hdr" style="padding-bottom:16px">
+    <div class="hdr-sm">O meu portfólio</div>
+    <div class="hdr-big">Investimentos</div>
+  </div>
+  <div class="wrap">
+    <div class="inv-grid">
+      <div class="inv-box"><div class="inv-box-lbl">Total investido</div><div class="inv-box-val blu" id="inv-tot">€ 0,00</div></div>
+      <div class="inv-box"><div class="inv-box-lbl">Valor atual</div><div class="inv-box-val grn" id="inv-atu">€ 0,00</div></div>
+      <div class="inv-box"><div class="inv-box-lbl">Rendimento</div><div class="inv-box-val grn" id="inv-rnd">€ 0,00</div></div>
+      <div class="inv-box"><div class="inv-box-lbl">Rentabilidade</div><div class="inv-box-val grn" id="inv-pct">0,00%</div></div>
+    </div>
+    <div id="inv-list"></div>
+    <div class="sec-title">Sugestões para perfil moderado</div>
+    <div class="tip tip-g"><h4>🏦 Depósito a prazo</h4><p>AIB e Bank of Ireland oferecem 2–3% ao ano. Ideal para fundo de emergência (3–6 meses de despesas). Risco zero.</p></div>
+    <div class="tip tip-b"><h4>📊 ETFs diversificados (recomendado)</h4><p>VWCE (Vanguard All World) ou S&P 500. Disponível no Trading 212 ou DEGIRO. Histórico de 7–10% ao ano a longo prazo. Ótimo para perfil moderado.</p></div>
+    <div class="tip tip-b"><h4>🇮🇪 Pensão PRSA na Irlanda</h4><p>Isenção de imposto até 40% nas contribuições. Um dos melhores retornos disponíveis para residentes na Irlanda.</p></div>
+    <div class="tip tip-y"><h4>📈 Ações individuais</h4><p>Máximo 20–30% da carteira para perfil moderado. Maior risco, maior potencial. Pesquise bem antes.</p></div>
+    <div class="tip tip-r"><h4>⚠️ Aviso</h4><p>Informação educativa, não aconselhamento financeiro. Para decisões importantes consulte um Financial Advisor em centralbank.ie</p></div>
+  </div>
+  <button class="fab" onclick="openModal('modal-inv')" aria-label="Adicionar investimento">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+</div>
+
+<!-- ===== DEFINIÇÕES ===== -->
+<div id="scr-cfg" class="scr">
+  <div class="hdr" style="padding-bottom:16px">
+    <div class="hdr-sm">Personalizar</div>
+    <div class="hdr-big">Definições</div>
+  </div>
+  <div class="wrap">
+
+    <div class="sec-title" style="margin-top:0">O meu salário</div>
+    <div class="card card-pad">
+      <div class="fgroup"><div class="flabel">Salário mensal líquido (€)</div><input class="finput" id="cfg-sal" type="number" inputmode="decimal" placeholder="Ex: 2500" min="0"></div>
+      <button class="fbtn fbtn-green" onclick="saveSal()">Guardar salário</button>
+    </div>
+
+    <div class="sec-title">Limites por categoria</div>
+    <div class="card card-pad">
+      <div id="cfg-cats"></div>
+    </div>
+
+    <div class="sec-title">Nova categoria</div>
+    <div class="card card-pad">
+      <div class="fgroup"><div class="flabel">Nome</div><input class="finput" id="nc-nm" placeholder="Ex: Ginásio, Roupas..."></div>
+      <div class="fgroup"><div class="flabel">Ícone (emoji)</div><input class="finput" id="nc-ic" placeholder="🎯" maxlength="2"></div>
+      <div class="fgroup"><div class="flabel">Cor</div>
+        <select class="finput" id="nc-cor">
+          <option value="#E1F5EE">Verde</option>
+          <option value="#E6F1FB">Azul</option>
+          <option value="#FAEEDA">Amarelo</option>
+          <option value="#FAECE7">Coral</option>
+          <option value="#EEEDFE">Roxo</option>
+          <option value="#F1EFE8">Cinzento</option>
+        </select>
+      </div>
+      <div class="fgroup"><div class="flabel">Limite mensal (€)</div><input class="finput" id="nc-lm" type="number" inputmode="decimal" placeholder="0 = sem limite" min="0"></div>
+      <button class="fbtn fbtn-outline" onclick="addCat()">Adicionar categoria</button>
+    </div>
+
+    <div class="sec-title">Apagar dados</div>
+    <div class="card card-pad">
+      <button class="fbtn" style="background:#FCEBEB;color:#791F1F;border:none" onclick="resetApp()">Apagar todos os dados</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: GASTO ===== -->
+<div class="modal-bg hide" id="modal-gasto">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-gasto')">×</button>
+    <div class="modal-title">Registar gasto</div>
+    <div class="fgroup"><div class="flabel">Descrição</div><input class="finput" id="g-desc" placeholder="Ex: Supermercado, renda..."></div>
+    <div class="fgroup"><div class="flabel">Valor (€)</div><input class="finput" id="g-val" type="number" inputmode="decimal" placeholder="0,00" min="0" step="0.01"></div>
+    <div class="fgroup"><div class="flabel">Categoria</div><select class="finput" id="g-cat"></select></div>
+    <button class="fbtn fbtn-green" onclick="addGasto()" style="margin-top:4px">Registar gasto</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: INVESTIMENTO ===== -->
+<div class="modal-bg hide" id="modal-inv">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-inv')">×</button>
+    <div class="modal-title">Adicionar investimento</div>
+    <div class="fgroup"><div class="flabel">Nome</div><input class="finput" id="i-nm" placeholder="Ex: ETF VWCE, Depósito AIB..."></div>
+    <div class="fgroup"><div class="flabel">Tipo</div>
+      <select class="finput" id="i-tp">
+        <option value="ETF">ETF / Fundo indexado</option>
+        <option value="Ações">Ações</option>
+        <option value="Poupança">Depósito / Poupança</option>
+        <option value="Pensão">Pensão / PRSA</option>
+        <option value="Cripto">Criptomoeda</option>
+        <option value="Outro">Outro</option>
+      </select>
+    </div>
+    <div class="fgroup"><div class="flabel">Valor investido (€)</div><input class="finput" id="i-inv" type="number" inputmode="decimal" placeholder="Ex: 500" min="0" step="0.01"></div>
+    <div class="fgroup"><div class="flabel">Valor atual (€)</div><input class="finput" id="i-atu" type="number" inputmode="decimal" placeholder="Quanto vale hoje" min="0" step="0.01"></div>
+    <div class="fgroup"><div class="flabel">Data de início</div><input class="finput" id="i-dt" type="date"></div>
+    <button class="fbtn fbtn-green" onclick="addInv()" style="margin-top:4px">Adicionar</button>
+  </div>
+</div>
+
+<!-- ===== BOTTOM NAV ===== -->
+<nav class="bnav">
+  <button class="bnav-btn on" id="nb-home" onclick="nav('home')">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Início
+  </button>
+  <button class="bnav-btn" id="nb-hist" onclick="nav('hist')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Histórico
+  </button>
+  <button class="bnav-btn" id="nb-inv" onclick="nav('inv')">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>Investir
+  </button>
+  <button class="bnav-btn" id="nb-cfg" onclick="nav('cfg')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Definições
+  </button>
+</nav>
+
+<script>
+const KEY='mf3';
+const DCATS=[
+  {id:'moradia',nm:'Moradia',ic:'🏠',cor:'#E6F1FB',lm:0},
+  {id:'alim',nm:'Alimentação',ic:'🛒',cor:'#E1F5EE',lm:0},
+  {id:'transp',nm:'Transporte',ic:'🚗',cor:'#FAEEDA',lm:0},
+  {id:'saude',nm:'Saúde',ic:'💊',cor:'#FAECE7',lm:0},
+  {id:'lazer',nm:'Lazer',ic:'🎉',cor:'#EEEDFE',lm:0},
+  {id:'outros',nm:'Outros',ic:'📦',cor:'#F1EFE8',lm:0},
+];
+
+function load(){
+  try{
+    const d=localStorage.getItem(KEY);
+    if(d) return JSON.parse(d);
+  }catch(e){}
+  return {sal:0, cats:JSON.parse(JSON.stringify(DCATS)), gastos:[], invs:[]};
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+let S=load();
+let curPage='home';
+
+function fmt(v){
+  const n=Math.round((parseFloat(v)||0)*100)/100;
+  return '€\u00a0'+n.toFixed(2).replace('.',',');
+}
+function fmtPct(v){return((parseFloat(v)||0).toFixed(2)).replace('.',',')+'%'}
+
+function catGasto(id){return S.gastos.reduce((a,g)=>g.cid===id?a+g.val:a,0)}
+function totGasto(){return S.gastos.reduce((a,g)=>a+g.val,0)}
+function totInvPrin(){return S.invs.reduce((a,i)=>a+i.inv,0)}
+function totInvAtu(){return S.invs.reduce((a,i)=>a+i.atu,0)}
+
+/* ---- NAV ---- */
+function nav(p){
+  curPage=p;
+  ['home','hist','inv','cfg'].forEach(x=>{
+    document.getElementById('scr-'+x).classList.toggle('on',x===p);
+    document.getElementById('nb-'+x).classList.toggle('on',x===p);
+  });
+  if(p==='home') renderHome();
+  else if(p==='hist') renderHist();
+  else if(p==='inv') renderInv();
+  else if(p==='cfg') renderCfg();
+}
+
+/* ---- MODALS ---- */
+function openModal(id){
+  if(id==='modal-gasto') renderCatSel();
+  document.getElementById(id).classList.remove('hide');
+}
+function closeModal(id){document.getElementById(id).classList.add('hide');}
+document.querySelectorAll('.modal-bg').forEach(m=>{
+  m.addEventListener('click',function(e){if(e.target===this)this.classList.add('hide');});
+});
+
+/* ---- RENDER HOME ---- */
+function renderHome(){
+  const tg=totGasto(), ti=totInvPrin(), disp=S.sal-tg-ti;
+  document.getElementById('h-sal').textContent=fmt(S.sal);
+  document.getElementById('h-gasto').textContent=fmt(tg);
+  document.getElementById('h-inv').textContent=fmt(ti);
+  document.getElementById('h-disp').textContent=fmt(Math.max(0,disp));
+
+  let al='';
+  S.cats.forEach(c=>{
+    if(!c.lm) return;
+    const g=catGasto(c.id), r=g/c.lm;
+    if(r>=1) al+=`<div class="alrt alrt-red"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span><b>${c.nm}</b> ultrapassou o limite! Gasto ${fmt(g)} de ${fmt(c.lm)}</span></div>`;
+    else if(r>=0.8) al+=`<div class="alrt alrt-warn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span><b>${c.nm}</b> em ${Math.round(r*100)}% do limite. Cuidado!</span></div>`;
+  });
+  document.getElementById('alerts').innerHTML=al;
+
+  if(!S.sal){
+    document.getElementById('cat-list').innerHTML='<div class="empty">Vai a <b>Definições</b> e coloca o teu salário para começar a usar o app!</div>';
+    return;
+  }
+  document.getElementById('cat-list').innerHTML=S.cats.map(c=>{
+    const g=catGasto(c.id);
+    const pct=c.lm>0?Math.min(g/c.lm,1):0;
+    const st=c.lm>0?(g>c.lm?'over':g/c.lm>=0.8?'warn':'ok'):'ok';
+    const bc=st==='over'?'#E24B4A':st==='warn'?'#EF9F27':'#1D9E75';
+    const bCls=st==='over'?'b-over':st==='warn'?'b-warn':'b-ok';
+    const bTxt=st==='over'?'Ultrapassado':st==='warn'?'Atenção':'OK';
+    return`<div class="catcard">
+      <div class="cat-top">
+        <div style="display:flex;align-items:center">
+          <div class="cat-ico" style="background:${c.cor}">${c.ic}</div>
+          <div class="cat-info"><div class="cat-nm">${c.nm}</div><div class="cat-lm">${c.lm?'Limite: '+fmt(c.lm):'Sem limite'}</div></div>
+        </div>
+        <div class="cat-val" style="color:${bc}">${fmt(g)}</div>
+      </div>
+      ${c.lm?`<div class="bar"><div class="bar-in" style="width:${Math.round(pct*100)}%;background:${bc}"></div></div>`:''}
+      <div class="cat-bot"><span class="badge ${bCls}">${bTxt}</span><span style="font-size:12px;color:#888">${c.lm?Math.round(pct*100)+'%':''}</span></div>
+    </div>`;
+  }).join('');
+}
+
+/* ---- GASTO ---- */
+function renderCatSel(){
+  document.getElementById('g-cat').innerHTML=S.cats.map(c=>`<option value="${c.id}">${c.ic} ${c.nm}</option>`).join('');
+}
+function addGasto(){
+  const desc=(document.getElementById('g-desc').value||'').trim();
+  const val=parseFloat(document.getElementById('g-val').value)||0;
+  const cid=document.getElementById('g-cat').value;
+  if(!desc||val<=0){alert('Preenche a descrição e um valor válido!');return;}
+  S.gastos.push({id:Date.now(),desc,val,cid,dt:new Date().toLocaleDateString('pt-PT')});
+  save();
+  document.getElementById('g-desc').value='';
+  document.getElementById('g-val').value='';
+  closeModal('modal-gasto');
+  renderHome();
+}
+
+/* ---- HISTÓRICO ---- */
+function renderHist(){
+  const el=document.getElementById('hist-list');
+  if(!S.gastos.length){el.innerHTML='<div class="empty">Ainda não há gastos registados.<br>Toca no botão + para adicionar.</div>';return;}
+  const lst=[...S.gastos].reverse();
+  el.innerHTML='<div class="card card-pad">'+lst.map(g=>{
+    const c=S.cats.find(x=>x.id===g.cid)||{ic:'📦',cor:'#F1EFE8',nm:'Outros'};
+    return`<div class="hist-row">
+      <div class="hist-ico" style="background:${c.cor}">${c.ic}</div>
+      <div class="hist-info"><div class="hist-nm">${g.desc}</div><div class="hist-dt">${c.nm} · ${g.dt}</div></div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <span class="hist-v">-${fmt(g.val)}</span>
+        <button class="delbtn" onclick="delGasto(${g.id})" aria-label="Apagar"><svg viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2L5,6"/><path d="M10,11v6M14,11v6M9,6V4h6v2"/></svg></button>
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+}
+function delGasto(id){
+  if(!confirm('Apagar este gasto?'))return;
+  S.gastos=S.gastos.filter(g=>g.id!==id);
+  save();renderHist();renderHome();
+}
+
+/* ---- INVESTIMENTOS ---- */
+function renderInv(){
+  const prin=totInvPrin(), atu=totInvAtu(), rnd=atu-prin;
+  const pct=prin>0?(rnd/prin)*100:0;
+  document.getElementById('inv-tot').textContent=fmt(prin);
+  document.getElementById('inv-atu').textContent=fmt(atu);
+  document.getElementById('inv-rnd').textContent=(rnd>=0?'+':'')+fmt(rnd);
+  document.getElementById('inv-pct').textContent=(pct>=0?'+':'')+fmtPct(pct);
+
+  const el=document.getElementById('inv-list');
+  if(!S.invs.length){el.innerHTML='<div class="empty">Ainda não há investimentos.<br>Toca no + para adicionar.</div>';return;}
+  const tpCor={ETF:'#E6F1FB',Ações:'#FAEEDA',Poupança:'#E1F5EE',Pensão:'#EEEDFE',Cripto:'#FAECE7',Outro:'#F1EFE8'};
+  const tpTxt={ETF:'#0C447C',Ações:'#633806',Poupança:'#085041',Pensão:'#3C3489',Cripto:'#712B13',Outro:'#444441'};
+  el.innerHTML=S.invs.map(i=>{
+    const rnd=i.atu-i.inv, pct=i.inv>0?(rnd/i.inv)*100:0;
+    const bg=tpCor[i.tp]||'#F1EFE8', tx=tpTxt[i.tp]||'#444441';
+    return`<div class="inv-card">
+      <div class="inv-hdr">
+        <div><div class="inv-nm">${i.nm}</div><div style="font-size:11px;color:#888;margin-top:2px">Desde ${i.dt}</div></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="inv-tp" style="background:${bg};color:${tx}">${i.tp}</span>
+          <button class="delbtn" onclick="delInv(${i.id})" aria-label="Apagar"><svg viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2L5,6"/><path d="M10,11v6M14,11v6M9,6V4h6v2"/></svg></button>
+        </div>
+      </div>
+      <div class="inv-row"><span class="inv-lbl">Investido</span><span class="inv-vl">${fmt(i.inv)}</span></div>
+      <div class="inv-row"><span class="inv-lbl">Valor atual</span><span class="inv-vl">${fmt(i.atu)}</span></div>
+      <div class="inv-row"><span class="inv-lbl">Rendimento</span><span class="inv-vl g">${rnd>=0?'+':''}${fmt(rnd)} (${pct>=0?'+':''}${fmtPct(pct)})</span></div>
+    </div>`;
+  }).join('');
+}
+function addInv(){
+  const nm=(document.getElementById('i-nm').value||'').trim();
+  const tp=document.getElementById('i-tp').value;
+  const inv=parseFloat(document.getElementById('i-inv').value)||0;
+  const atu=parseFloat(document.getElementById('i-atu').value)||inv;
+  const dt=document.getElementById('i-dt').value||new Date().toLocaleDateString('pt-PT');
+  if(!nm||inv<=0){alert('Preenche o nome e o valor investido!');return;}
+  S.invs.push({id:Date.now(),nm,tp,inv,atu,dt});
+  save();
+  document.getElementById('i-nm').value='';
+  document.getElementById('i-inv').value='';
+  document.getElementById('i-atu').value='';
+  closeModal('modal-inv');
+  renderInv();
+}
+function delInv(id){
+  if(!confirm('Apagar este investimento?'))return;
+  S.invs=S.invs.filter(i=>i.id!==id);
+  save();renderInv();
+}
+
+/* ---- CONFIGURAÇÕES ---- */
+function renderCfg(){
+  document.getElementById('cfg-sal').value=S.sal||'';
+  document.getElementById('cfg-cats').innerHTML=S.cats.map((c,i)=>`
+    <div class="cfg-row">
+      <div class="cfg-left">
+        <div class="cfg-ico" style="background:${c.cor}">${c.ic}</div>
+        <div><div class="cfg-nm">${c.nm}</div><div class="cfg-lm">${c.lm?'Limite: '+fmt(c.lm):'Sem limite'}</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input style="width:80px;padding:8px;border:1.5px solid #e0e0de;border-radius:10px;font-size:14px;text-align:center" type="number" inputmode="decimal" value="${c.lm||''}" placeholder="€" min="0" onchange="updLm(${i},this.value)">
+        <button class="delbtn" onclick="delCat(${i})" aria-label="Remover"><svg viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2L5,6"/><path d="M10,11v6M14,11v6M9,6V4h6v2"/></svg></button>
+      </div>
+    </div>`).join('');
+}
+function saveSal(){
+  const v=parseFloat(document.getElementById('cfg-sal').value)||0;
+  S.sal=v;save();
+  alert('Salário guardado: '+fmt(v));
+  renderHome();
+}
+function updLm(i,v){S.cats[i].lm=parseFloat(v)||0;save();}
+function addCat(){
+  const nm=(document.getElementById('nc-nm').value||'').trim();
+  const ic=(document.getElementById('nc-ic').value||'').trim()||'📌';
+  const cor=document.getElementById('nc-cor').value;
+  const lm=parseFloat(document.getElementById('nc-lm').value)||0;
+  if(!nm){alert('Escreve o nome da categoria!');return;}
+  S.cats.push({id:'c'+Date.now(),nm,ic,cor,lm});
+  save();
+  document.getElementById('nc-nm').value='';
+  document.getElementById('nc-ic').value='';
+  document.getElementById('nc-lm').value='';
+  renderCfg();renderHome();
+  alert('Categoria "'+nm+'" criada!');
+}
+function delCat(i){
+  if(!confirm('Remover "'+S.cats[i].nm+'"?'))return;
+  S.cats.splice(i,1);save();renderCfg();renderHome();
+}
+function resetApp(){
+  if(!confirm('Apagar TODOS os dados? Esta ação não pode ser desfeita.'))return;
+  localStorage.removeItem(KEY);
+  S={sal:0,cats:JSON.parse(JSON.stringify(DCATS)),gastos:[],invs:[]};
+  renderHome();renderCfg();
+  alert('Dados apagados.');
+}
+
+renderHome();
+</script>
+</body>
+</html>
